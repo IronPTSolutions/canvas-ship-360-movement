@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <style type="text/css">
+    canvas {
+      border:  1px dotted;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c" width="600" height="600"></canvas>
+</body>
+</html>
+
+<script type="text/javascript">
+
+  /////////////////////////////
+
+  function Game(canvas) {
+    this.ctx = canvas.getContext("2d");
+    this.ship = new Ship(this.ctx);
+    this.intervalId = undefined;
+  }
+
+  Game.prototype.start = function() {
+    this.intervalId = setInterval(function() {
+      this.clear();
+      this.moveAll();
+      this.drawAll();
+    }.bind(this), 16);
+  };
+
+  Game.prototype.clear = function() {
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+  };
+
+  Game.prototype.moveAll = function() {
+    this.ship.move();
+  };
+
+  Game.prototype.drawAll = function() {
+    this.ship.draw();
+  };
+
+  /////////////////////////////
+
+  function Ship(ctx) {
+    this.ctx = ctx;
+
+    this.w = this.ctx.canvas.width * 0.03;
+    this.h = 3 * this.w;
+
+    this.x = this.ctx.canvas.width / 2 - this.w / 2;
+    this.y = this.ctx.canvas.width / 2 - this.h / 2;
+
+    this.v = 0;
+    this.angle = 0;
+
+    this.setListeners();
+  }
+
+  Ship.prototype.draw = function() {
+    this.ctx.save();
+
+    this.ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+    this.ctx.rotate(this.angle - Math.PI / 2);
+
+    this.ctx.beginPath();
+    this.ctx.rect(0 - this.w / 2, 0 - this.h / 2, this.w, this.h);
+    this.ctx.fill();
+    this.ctx.closePath();
+
+    this.ctx.restore();
+  };
+
+  Ship.prototype.move = function() {
+    this.x += this.v * Math.cos(this.angle);
+    this.y += this.v * Math.sin(this.angle);
+  };
+
+  var LEFT = 37;
+  var TOP = 38;
+  var RIGHT = 39;
+
+  Ship.prototype.setListeners = function() {
+    document.onkeydown = function(event) {
+      switch (event.keyCode) {
+        case RIGHT:
+          this.angle += Math.PI / 32
+          break;
+        case LEFT:
+          this.angle -= Math.PI / 32
+          break;
+        case TOP:
+          this.v = 5
+          break;
+      }
+    }.bind(this);
+
+    document.onkeyup = function(event) {
+      switch (event.keyCode) {
+        case RIGHT:
+        case LEFT:
+          break;
+        case TOP:
+          this.v = 0
+      }
+    }.bind(this);
+  };
+
+  /////////////////////////////
+
+  new Game(document.getElementById("c")).start();
+
+</script>
